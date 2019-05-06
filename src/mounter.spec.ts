@@ -12,6 +12,8 @@ import {Mounter} from './mounter';
 const readdirP = promisify(readdir);
 const lstatP = promisify(lstat);
 
+const mountTimeout = 1000 * 60;
+
 const fixtures = './spec/fixtures';
 
 const fixtureTestDiskImage = `${fixtures}/test-disk-image.dmg`;
@@ -186,7 +188,7 @@ describe('mounter', () => {
 					const st = await stat(mountPoint);
 					expect(st).toBeNull();
 				}
-			});
+			}, mountTimeout);
 		});
 	});
 });
