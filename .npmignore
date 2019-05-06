@@ -24,6 +24,7 @@ yarn.lock
 /.eslintignore
 /.eslintrc.yaml
 /.tern-project
+/.travis.yml
 /package-scripts.yml
 /tsconfig.json
 /tslint.yaml
