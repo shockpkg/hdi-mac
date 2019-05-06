@@ -26,10 +26,6 @@ matrix:
       osx_image: xcode8
       node_js: 'v12.1.0'
 
-    - os: osx
-      osx_image: xcode6.4
-      node_js: 'v12.1.0'
-
 cache:
   directories:
     - 'node_modules'
