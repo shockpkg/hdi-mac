@@ -1,0 +1,26 @@
+language: node_js
+
+os:
+  - osx
+
+osx_image:
+  - xcode10.2
+  - xcode10.1
+  - xcode9.2
+  - xcode8
+  - xcode6.4
+
+node_js:
+  - 'v10.0.0'
+  - 'v10.15.3'
+  - 'v12.1.0'
+
+cache:
+  directories:
+    - 'node_modules'
+
+script:
+  - npm run clean
+  - npm run lint
+  - npm run build
+  - npm run test
