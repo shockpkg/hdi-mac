@@ -22,6 +22,8 @@ Currently mounting and ejecting disk images is supported.
 
 Fully wrapping all available hdiutil features is out of scope for this project.
 
+Only functions on macOS, as it depends on the macOS hdiutil, but safe to import or require on all platforms.
+
 
 # Usage
 
