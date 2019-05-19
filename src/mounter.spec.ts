@@ -16,7 +16,15 @@ const mountTimeout = 1000 * 60;
 
 const fixtures = './spec/fixtures';
 
-const fixtureTestDiskImage = `${fixtures}/test-disk-image.dmg`;
+const fixtureTestDiskImages = [
+	'test-disk-image-hybrid.iso',
+	'test-disk-image-hfsp.dmg',
+	'test-disk-image-hfsp-j.dmg',
+	'test-disk-image-hfsp-c.dmg',
+	'test-disk-image-hfsp-j-c.dmg',
+	'test-disk-image-apfs.dmg',
+	'test-disk-image-apfs-c.dmg'
+].map(s => `${fixtures}/${s}`);
 
 async function dirlist(path: string, dotfiles = true) {
 	const r = await readdirP(path);
@@ -81,114 +89,118 @@ describe('mounter', () => {
 		});
 
 		describe('attach', () => {
-			it('no options', async () => {
-				const mounter = new MounterTestRun();
-				await mounter.attach(fixtureTestDiskImage);
+			for (const fixtureTestDiskImage of fixtureTestDiskImages) {
+				describe(fixtureTestDiskImage, () => {
+					it('no options', async () => {
+						const mounter = new MounterTestRun();
+						await mounter.attach(fixtureTestDiskImage);
 
-				expect(mounter.attachArgs).not.toContain('-readonly');
-				expect(mounter.attachArgs).not.toContain('-nobrowse');
-			});
+						expect(mounter.attachArgs).not.toContain('-readonly');
+						expect(mounter.attachArgs).not.toContain('-nobrowse');
+					});
 
-			it('option: readonly = true', async () => {
-				const mounter = new MounterTestRun();
-				await mounter.attach(fixtureTestDiskImage, {
-					readonly: true
+					it('option: readonly = true', async () => {
+						const mounter = new MounterTestRun();
+						await mounter.attach(fixtureTestDiskImage, {
+							readonly: true
+						});
+
+						expect(mounter.attachArgs).toContain('-readonly');
+					});
+
+					it('option: readonly = false', async () => {
+						const mounter = new MounterTestRun();
+						await mounter.attach(fixtureTestDiskImage, {
+							readonly: false
+						});
+
+						expect(mounter.attachArgs).not.toContain('-readonly');
+					});
+
+					it('option: nobrowse = true', async () => {
+						const mounter = new MounterTestRun();
+						await mounter.attach(fixtureTestDiskImage, {
+							nobrowse: true
+						});
+
+						expect(mounter.attachArgs).toContain('-nobrowse');
+					});
+
+					it('option: nobrowse = false', async () => {
+						const mounter = new MounterTestRun();
+						await mounter.attach(fixtureTestDiskImage, {
+							nobrowse: false
+						});
+
+						expect(mounter.attachArgs).not.toContain('-nobrowse');
+					});
+
+					it('eject: no options', async () => {
+						const mounter = new MounterTestRun();
+						const info = await mounter.attach(fixtureTestDiskImage);
+
+						await info.eject();
+						expect(mounter.ejectArgs).toContain('/dev/disk42');
+					});
+
+					it('eject: force = false', async () => {
+						const mounter = new MounterTestRun();
+						const info = await mounter.attach(fixtureTestDiskImage);
+
+						await info.eject({
+							force: false
+						});
+						expect(mounter.ejectArgs).not.toContain('-force');
+					});
+
+					it('eject: force = true', async () => {
+						const mounter = new MounterTestRun();
+						const info = await mounter.attach(fixtureTestDiskImage);
+
+						await info.eject({
+							force: true
+						});
+						expect(mounter.ejectArgs).toContain('-force');
+					});
+
+					it('file not an argument', async () => {
+						const dummy = '-test.dmg';
+						const mounter = new MounterTestRun();
+						await mounter.attach(dummy);
+
+						expect(mounter.attachArgs).not.toContain(dummy);
+						expect(mounter.attachArgs).toContain(`./${dummy}`);
+					});
+
+					it('hdi attach and eject', async () => {
+						const mounter = new Mounter();
+						const info = await mounter.attach(fixtureTestDiskImage);
+
+						let mountPoint: string | null = null;
+						for (const device of info.devices) {
+							if (device.mountPoint) {
+								mountPoint = device.mountPoint;
+							}
+						}
+						expect(typeof mountPoint).toBe('string');
+						if (mountPoint) {
+							const listing = await dirlist(mountPoint);
+							expect(listing).toEqual([
+								'file-a.txt',
+								'file-b.txt',
+								'file-c.txt'
+							]);
+						}
+
+						await info.eject();
+
+						if (mountPoint) {
+							const st = await stat(mountPoint);
+							expect(st).toBeNull();
+						}
+					}, mountTimeout);
 				});
-
-				expect(mounter.attachArgs).toContain('-readonly');
-			});
-
-			it('option: readonly = false', async () => {
-				const mounter = new MounterTestRun();
-				await mounter.attach(fixtureTestDiskImage, {
-					readonly: false
-				});
-
-				expect(mounter.attachArgs).not.toContain('-readonly');
-			});
-
-			it('option: nobrowse = true', async () => {
-				const mounter = new MounterTestRun();
-				await mounter.attach(fixtureTestDiskImage, {
-					nobrowse: true
-				});
-
-				expect(mounter.attachArgs).toContain('-nobrowse');
-			});
-
-			it('option: nobrowse = false', async () => {
-				const mounter = new MounterTestRun();
-				await mounter.attach(fixtureTestDiskImage, {
-					nobrowse: false
-				});
-
-				expect(mounter.attachArgs).not.toContain('-nobrowse');
-			});
-
-			it('eject: no options', async () => {
-				const mounter = new MounterTestRun();
-				const info = await mounter.attach(fixtureTestDiskImage);
-
-				await info.eject();
-				expect(mounter.ejectArgs).toContain('/dev/disk42');
-			});
-
-			it('eject: force = false', async () => {
-				const mounter = new MounterTestRun();
-				const info = await mounter.attach(fixtureTestDiskImage);
-
-				await info.eject({
-					force: false
-				});
-				expect(mounter.ejectArgs).not.toContain('-force');
-			});
-
-			it('eject: force = true', async () => {
-				const mounter = new MounterTestRun();
-				const info = await mounter.attach(fixtureTestDiskImage);
-
-				await info.eject({
-					force: true
-				});
-				expect(mounter.ejectArgs).toContain('-force');
-			});
-
-			it('file not an argument', async () => {
-				const dummy = '-test.dmg';
-				const mounter = new MounterTestRun();
-				await mounter.attach(dummy);
-
-				expect(mounter.attachArgs).not.toContain(dummy);
-				expect(mounter.attachArgs).toContain(`./${dummy}`);
-			});
-
-			it('hdi attach and eject', async () => {
-				const mounter = new Mounter();
-				const info = await mounter.attach(fixtureTestDiskImage);
-
-				let mountPoint: string | null = null;
-				for (const device of info.devices) {
-					if (device.mountPoint) {
-						mountPoint = device.mountPoint;
-					}
-				}
-				expect(typeof mountPoint).toBe('string');
-				if (mountPoint) {
-					const listing = await dirlist(mountPoint);
-					expect(listing).toEqual([
-						'file-a.txt',
-						'file-b.txt',
-						'file-c.txt'
-					]);
-				}
-
-				await info.eject();
-
-				if (mountPoint) {
-					const st = await stat(mountPoint);
-					expect(st).toBeNull();
-				}
-			}, mountTimeout);
+			}
 		});
 	});
 });

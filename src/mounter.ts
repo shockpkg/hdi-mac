@@ -35,16 +35,6 @@ export interface IMounterEjectOptions {
 
 export interface IMounterDevice {
 	/**
-	 * The content-hint hdiutil info.
-	 */
-	contentHint: string;
-
-	/**
-	 * The unmapped-content-hint hdiutil info.
-	 */
-	unmappedContentHint: string;
-
-	/**
 	 * The dev-entry hdiutil info.
 	 */
 	devEntry: string;
@@ -53,6 +43,16 @@ export interface IMounterDevice {
 	 * The potentially-mountable hdiutil info.
 	 */
 	potentiallyMountable: boolean;
+
+	/**
+	 * The content-hint hdiutil info.
+	 */
+	contentHint?: string;
+
+	/**
+	 * The unmapped-content-hint hdiutil info.
+	 */
+	unmappedContentHint?: string;
 
 	/**
 	 * The volume-kind hdiutil info, if present.
@@ -236,19 +236,19 @@ export class Mounter extends Object {
 			return r;
 		};
 
+		const entityPropertyNull =
+			(entity: any, prop: string, type: string) => {
+				if (prop in entity) {
+					return entityProperty(entity, prop, type);
+				}
+				return null;
+			};
+
 		const r: IMounterDevice[] = [];
 		for (const entity of systemEntities) {
 			if (!entity || typeof entity !== 'object') {
 				throw new Error(errMsg('system-entities > *'));
 			}
-
-			const contentHint = entityProperty(
-				entity, 'content-hint', 'string'
-			) as string;
-
-			const unmappedContentHint = entityProperty(
-				entity, 'unmapped-content-hint', 'string'
-			) as string;
 
 			const devEntry = entityProperty(
 				entity, 'dev-entry', 'string'
@@ -258,20 +258,32 @@ export class Mounter extends Object {
 				entity, 'potentially-mountable', 'boolean'
 			) as boolean;
 
-			const volumeKind = ('volume-kind' in entity) ? entityProperty(
-				entity, 'volume-kind', 'string'
-			) as string : null;
+			const contentHint = entityPropertyNull(
+				entity, 'content-hint', 'string'
+			) as string | null;
 
-			const mountPoint = ('mount-point' in entity) ? entityProperty(
+			const unmappedContentHint = entityPropertyNull(
+				entity, 'unmapped-content-hint', 'string'
+			) as string | null;
+
+			const volumeKind = entityPropertyNull(
+				entity, 'volume-kind', 'string'
+			) as string | null;
+
+			const mountPoint = entityPropertyNull(
 				entity, 'mount-point', 'string'
-			) as string : null;
+			) as string | null;
 
 			const device: IMounterDevice = {
-				contentHint,
-				unmappedContentHint,
 				devEntry,
 				potentiallyMountable
 			};
+			if (contentHint !== null) {
+				device.contentHint = contentHint;
+			}
+			if (unmappedContentHint !== null) {
+				device.unmappedContentHint = unmappedContentHint;
+			}
 			if (volumeKind !== null) {
 				device.volumeKind = volumeKind;
 			}
