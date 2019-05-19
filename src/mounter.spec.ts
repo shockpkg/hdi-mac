@@ -16,15 +16,19 @@ const mountTimeout = 1000 * 60;
 
 const fixtures = './spec/fixtures';
 
+const testApfs = process.env.HDI_MAC_DISABLE_TEST_APFS !== '1';
+
 const fixtureTestDiskImages = [
 	'test-disk-image-hybrid.iso',
 	'test-disk-image-hfsp.dmg',
 	'test-disk-image-hfsp-j.dmg',
 	'test-disk-image-hfsp-c.dmg',
 	'test-disk-image-hfsp-j-c.dmg',
-	'test-disk-image-apfs.dmg',
-	'test-disk-image-apfs-c.dmg'
-].map(s => `${fixtures}/${s}`);
+	testApfs ? 'test-disk-image-apfs.dmg' : null,
+	testApfs ? 'test-disk-image-apfs-c.dmg' : null
+]
+	.filter(Boolean)
+	.map(s => `${fixtures}/${s}`);
 
 async function dirlist(path: string, dotfiles = true) {
 	const r = await readdirP(path);
