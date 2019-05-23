@@ -2,7 +2,6 @@ import {
 	parse as plistParse
 } from 'plist';
 
-import {property} from './decorators';
 import {spawn} from './util';
 
 export interface IMounterOptions {
@@ -87,20 +86,12 @@ export class Mounter extends Object {
 	/**
 	 * The path to hdiutil.
 	 */
-	@property(false)
-	protected readonly _hdiutil: string;
+	public hdiutil: string;
 
 	constructor(options: IMounterOptions | null = null) {
 		super();
 
-		this._hdiutil = (options ? options.hdiutil : null) || 'hdiutil';
-	}
-
-	/**
-	 * The path to hdiutil.
-	 */
-	public get hdiutil() {
-		return this._hdiutil;
+		this.hdiutil = (options ? options.hdiutil : null) || 'hdiutil';
 	}
 
 	/**
