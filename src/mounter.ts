@@ -2,7 +2,11 @@ import {
 	parse as plistParse
 } from 'plist';
 
-import {spawn} from './util';
+import {
+	shutdownHook,
+	shutdownUnhook,
+	spawn
+} from './util';
 
 export interface IMounterOptions {
 	/**
@@ -96,14 +100,19 @@ export class Mounter extends Object {
 
 	/**
 	 * Attach a disk image.
+	 * Optionally can attempt to eject on shutdown if not ejected by callback.
+	 * Passing a non-null object for ejectOnShutdown will enable auto-eject.
+	 * Passing null will not enable the auto-eject on shutdown (default).
 	 *
 	 * @param file Path to disk image.
 	 * @param options Options object.
+	 * @param ejectOnShutdown Eject on shutdown options, or null.
 	 * @return Info object.
 	 */
 	public async attach(
 		file: string,
-		options: IMounterAttachOptions | null = null
+		options: IMounterAttachOptions | null = null,
+		ejectOnShutdown: IMounterEjectOptions | null = null
 	) {
 		// Assemble args.
 		const args = ['attach', '-plist'];
@@ -121,7 +130,7 @@ export class Mounter extends Object {
 		const devices = await this._runAttach(args);
 
 		// Create the eject callback.
-		const eject = this._createEject(devices);
+		const eject = this._createEject(devices, ejectOnShutdown);
 
 		const info: IMounterAttachInfo = {
 			devices,
@@ -307,18 +316,42 @@ export class Mounter extends Object {
 	 * Create an eject callback from list of devices.
 	 *
 	 * @param devices Device list.
+	 * @param ejectOnShutdown Eject on shutdown options.
 	 * @return Callback function.
 	 */
-	protected _createEject(devices: IMounterDevice[]) {
+	protected _createEject(
+		devices: IMounterDevice[],
+		ejectOnShutdown: IMounterEjectOptions | null = null
+	) {
 		// Find the root device, to use to eject (none possible in theory).
 		const rootDev = this._findRootDevice(devices);
 		const rootDevPath = rootDev ? rootDev.devEntry : null;
 
-		return async (options: IMounterEjectOptions | null = null) => {
+		let shutdownEjector: any = null;
+
+		// The eject callback function.
+		const eject = async (options: IMounterEjectOptions | null = null) => {
+			// If shutdown ejector registered, remove now.
+			if (shutdownEjector) {
+				shutdownUnhook(shutdownEjector);
+				shutdownEjector = null;
+			}
+
+			// Only eject if something to eject.
 			if (!rootDevPath) {
 				return;
 			}
 			await this.eject(rootDevPath, options);
 		};
+
+		// Possibly register shutdown hook, using the eject options.
+		if (rootDevPath && ejectOnShutdown) {
+			shutdownEjector = async () => {
+				await eject(ejectOnShutdown);
+			};
+			shutdownHook(shutdownEjector);
+		}
+
+		return eject;
 	}
 }

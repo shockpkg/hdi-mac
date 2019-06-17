@@ -178,7 +178,11 @@ describe('mounter', () => {
 
 					it('hdi attach and eject', async () => {
 						const mounter = new Mounter();
-						const info = await mounter.attach(fixtureTestDiskImage);
+						const info = await mounter.attach(
+							fixtureTestDiskImage,
+							null,
+							{}
+						);
 
 						let mountPoint: string | null = null;
 						for (const device of info.devices) {

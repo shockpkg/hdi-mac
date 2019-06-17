@@ -67,6 +67,7 @@
 	},
 	"dependencies": {
 		"@babel/runtime": "^7.4.5",
+		"async-exit-hook": "^2.0.1",
 		"plist": "^3.0.1"
 	}
 }

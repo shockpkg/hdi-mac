@@ -4,6 +4,10 @@ import {
 	SpawnOptionsWithoutStdio
 } from 'child_process';
 
+import {
+	asyncExitHook
+} from './untyped';
+
 /**
  * Spawn a subprocess with a promise for completion.
  *
@@ -30,4 +34,42 @@ export function spawn(
 		proc,
 		done
 	};
+}
+
+const exitHooks = new Set<() => Promise<any>>();
+const exitHandler = async () => {
+	if (!exitHooks.size) {
+		return;
+	}
+	const list = [...exitHooks];
+	exitHooks.clear();
+	await Promise.all(list.map(f => f()));
+};
+let exitHooked = false;
+
+/**
+ * Shutdown hook callback function.
+ *
+ * @param callback Callback function.
+ */
+export function shutdownHook(callback: () => Promise<any>) {
+	if (!exitHooked) {
+		asyncExitHook((cb: any) => {
+			exitHandler().then(cb, cb);
+		});
+		asyncExitHook.uncaughtExceptionHandler((e: any, cb: any) => {
+			exitHandler().then(cb, cb);
+		});
+		exitHooked = true;
+	}
+	exitHooks.add(callback);
+}
+
+/**
+ * Shutdown unhook callback function.
+ *
+ * @param callback Callback function.
+ */
+export function shutdownUnhook(callback: () => Promise<any>) {
+	exitHooks.delete(callback);
 }
