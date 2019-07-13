@@ -171,6 +171,7 @@ gulp.task('build:lib:mjs', async () => {
 });
 
 gulp.task('build:lib', gulp.parallel([
+	'build:lib:dts',
 	'build:lib:cjs',
 	'build:lib:mjs'
 ]));
