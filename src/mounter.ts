@@ -1,6 +1,4 @@
-import {
-	parse as plistParse
-} from 'plist';
+import plist from 'plist';
 
 import {
 	shutdownHook,
@@ -9,15 +7,17 @@ import {
 } from './util';
 
 export interface IMounterOptions {
+
 	/**
 	 * The path for hdiutil.
 	 *
-	 * @defailt 'hdiutil'
+	 * @default 'hdiutil'
 	 */
 	hdiutil?: string | null;
 }
 
 export interface IMounterAttachOptions {
+
 	/**
 	 * Force the devices to be read-only.
 	 */
@@ -30,6 +30,7 @@ export interface IMounterAttachOptions {
 }
 
 export interface IMounterEjectOptions {
+
 	/**
 	 * Forcibly detach.
 	 */
@@ -37,6 +38,7 @@ export interface IMounterEjectOptions {
 }
 
 export interface IMounterDevice {
+
 	/**
 	 * The dev-entry hdiutil info.
 	 */
@@ -69,6 +71,7 @@ export interface IMounterDevice {
 }
 
 export interface IMounterAttachInfo {
+
 	/**
 	 * Device list.
 	 */
@@ -86,7 +89,6 @@ export interface IMounterAttachInfo {
  * @param options Options object.
  */
 export class Mounter extends Object {
-
 	/**
 	 * The path to hdiutil.
 	 */
@@ -107,7 +109,7 @@ export class Mounter extends Object {
 	 * @param file Path to disk image.
 	 * @param options Options object.
 	 * @param ejectOnShutdown Eject on shutdown options, or null.
-	 * @return Info object.
+	 * @returns Info object.
 	 */
 	public async attach(
 		file: string,
@@ -164,7 +166,7 @@ export class Mounter extends Object {
 	 * Run hdiutil attach command, returning the devices list on success.
 	 *
 	 * @param args CLI args.
-	 * @return Devices list.
+	 * @returns Devices list.
 	 */
 	protected async _runAttach(args: string[]) {
 		const {proc, done} = spawn(this.hdiutil, args);
@@ -202,10 +204,11 @@ export class Mounter extends Object {
 	 * Create file argument from file path.
 	 *
 	 * @param file File path.
-	 * @return A path for use as argument.
+	 * @returns A path for use as argument.
 	 */
 	protected _fileArg(file: string) {
 		// Make sure it will not be recognized as option argument.
+		// eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
 		return file.charAt(0) === '-' ? `./${file}` : file;
 	}
 
@@ -213,10 +216,10 @@ export class Mounter extends Object {
 	 * Parse devices plist into devices list.
 	 *
 	 * @param xml XML plist.
-	 * @return Devices list.
+	 * @returns Devices list.
 	 */
 	protected _parseDevices(xml: string) {
-		const parsed = plistParse(xml);
+		const parsed = plist.parse(xml);
 
 		const errMsg = (s: string) => `Error parsing hdiutil plist: ${s}`;
 		if (!parsed) {
@@ -228,7 +231,9 @@ export class Mounter extends Object {
 			throw new Error(errMsg('system-entities'));
 		}
 
-		const entityProperty = (entity: any, prop: string, type: string) => {
+		// Linter bug.
+		// eslint-disable-next-line @typescript-eslint/promise-function-async
+		const entityProp = (entity: any, prop: string, type: string) => {
 			const r = entity[prop];
 			if (typeof r !== type) {
 				throw new Error(errMsg(`system-entities > * > ${prop}`));
@@ -236,13 +241,14 @@ export class Mounter extends Object {
 			return r;
 		};
 
-		const entityPropertyNull =
-			(entity: any, prop: string, type: string) => {
-				if (prop in entity) {
-					return entityProperty(entity, prop, type);
-				}
-				return null;
-			};
+		// Linter bug.
+		// eslint-disable-next-line @typescript-eslint/promise-function-async
+		const entityPropNull = (entity: any, prop: string, type: string) => {
+			if (prop in entity) {
+				return entityProp(entity, prop, type);
+			}
+			return null;
+		};
 
 		const r: IMounterDevice[] = [];
 		for (const entity of systemEntities) {
@@ -250,27 +256,27 @@ export class Mounter extends Object {
 				throw new Error(errMsg('system-entities > *'));
 			}
 
-			const devEntry = entityProperty(
+			const devEntry = entityProp(
 				entity, 'dev-entry', 'string'
 			) as string;
 
-			const potentiallyMountable = entityProperty(
+			const potentiallyMountable = entityProp(
 				entity, 'potentially-mountable', 'boolean'
 			) as boolean;
 
-			const contentHint = entityPropertyNull(
+			const contentHint = entityPropNull(
 				entity, 'content-hint', 'string'
 			) as string | null;
 
-			const unmappedContentHint = entityPropertyNull(
+			const unmappedContentHint = entityPropNull(
 				entity, 'unmapped-content-hint', 'string'
 			) as string | null;
 
-			const volumeKind = entityPropertyNull(
+			const volumeKind = entityPropNull(
 				entity, 'volume-kind', 'string'
 			) as string | null;
 
-			const mountPoint = entityPropertyNull(
+			const mountPoint = entityPropNull(
 				entity, 'mount-point', 'string'
 			) as string | null;
 
@@ -300,7 +306,7 @@ export class Mounter extends Object {
 	 * Find the root device, null on empty list.
 	 *
 	 * @param devices Device list.
-	 * @return Root device or null if an empty list.
+	 * @returns Root device or null if an empty list.
 	 */
 	protected _findRootDevice(devices: IMounterDevice[]) {
 		let r: IMounterDevice | null = null;
@@ -317,7 +323,7 @@ export class Mounter extends Object {
 	 *
 	 * @param devices Device list.
 	 * @param ejectOnShutdown Eject on shutdown options.
-	 * @return Callback function.
+	 * @returns Callback function.
 	 */
 	protected _createEject(
 		devices: IMounterDevice[],

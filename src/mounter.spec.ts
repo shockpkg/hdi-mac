@@ -1,5 +1,6 @@
-// tslint:disable:max-classes-per-file
-// tslint:disable:completed-docs
+/* eslint-env jasmine */
+/* eslint-disable max-nested-callbacks */
+/* eslint-disable jsdoc/require-jsdoc */
 
 import {
 	lstat,
@@ -16,6 +17,7 @@ const mountTimeout = 1000 * 60;
 
 const fixtures = './spec/fixtures';
 
+// eslint-disable-next-line no-process-env
 const testApfs = process.env.HDI_MAC_DISABLE_TEST_APFS !== '1';
 
 const fixtureTestDiskImages = [
@@ -32,7 +34,8 @@ const fixtureTestDiskImages = [
 
 async function dirlist(path: string, dotfiles = true) {
 	const r = await readdirP(path);
-	return r.filter(s => s.charAt(0) === '.' ? dotfiles : true).sort();
+	// eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
+	return r.filter(s => (s.charAt(0) === '.' ? dotfiles : true)).sort();
 }
 
 async function stat(path: string) {
@@ -46,6 +49,7 @@ async function stat(path: string) {
 
 class MounterTestRun extends Mounter {
 	public attachArgs: string[] = [];
+
 	public ejectArgs: string[] = [];
 
 	protected async _runAttach(args: string[]) {
@@ -187,6 +191,7 @@ describe('mounter', () => {
 						let mountPoint: string | null = null;
 						for (const device of info.devices) {
 							if (device.mountPoint) {
+								// eslint-disable-next-line prefer-destructuring
 								mountPoint = device.mountPoint;
 							}
 						}

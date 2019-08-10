@@ -14,7 +14,7 @@ import {
  * @param command Command path.
  * @param args Argument list.
  * @param options Options object.
- * @return Info object.
+ * @returns Info object.
  */
 export function spawn(
 	command: string,
@@ -43,7 +43,7 @@ const exitHandler = async () => {
 	}
 	const list = [...exitHooks];
 	exitHooks.clear();
-	await Promise.all(list.map(f => f()));
+	await Promise.all(list.map(async f => f()));
 };
 let exitHooked = false;
 
