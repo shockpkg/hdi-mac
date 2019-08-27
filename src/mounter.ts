@@ -231,8 +231,6 @@ export class Mounter extends Object {
 			throw new Error(errMsg('system-entities'));
 		}
 
-		// Linter bug.
-		// eslint-disable-next-line @typescript-eslint/promise-function-async
 		const entityProp = (entity: any, prop: string, type: string) => {
 			const r = entity[prop];
 			if (typeof r !== type) {
@@ -241,8 +239,6 @@ export class Mounter extends Object {
 			return r;
 		};
 
-		// Linter bug.
-		// eslint-disable-next-line @typescript-eslint/promise-function-async
 		const entityPropNull = (entity: any, prop: string, type: string) => {
 			if (prop in entity) {
 				return entityProp(entity, prop, type);
