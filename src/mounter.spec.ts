@@ -1,7 +1,3 @@
-/* eslint-env jasmine */
-/* eslint-disable max-nested-callbacks */
-/* eslint-disable jsdoc/require-jsdoc */
-
 import {
 	lstat,
 	readdir
