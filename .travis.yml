@@ -4,36 +4,36 @@ matrix:
   include:
   - os: osx
     osx_image: xcode10.2
-    node_js: 'v10.0.0'
+    node_js: v10.0.0
 
   - os: osx
     osx_image: xcode10.2
-    node_js: 'v10.16.2'
+    node_js: v10.16.3
 
   - os: osx
     osx_image: xcode10.2
-    node_js: 'v12.8.0'
+    node_js: v12.9.1
 
   - os: osx
     osx_image: xcode10.1
-    node_js: 'v12.8.0'
+    node_js: v12.9.1
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
   - os: osx
     osx_image: xcode9.2
-    node_js: 'v12.8.0'
+    node_js: v12.9.1
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
   - os: osx
     osx_image: xcode8
-    node_js: 'v12.8.0'
+    node_js: v12.9.1
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
 script:
-  - npm run clean
-  - npm run lint
-  - npm run build
-  - npm run test
+- npm run clean
+- npm run lint
+- npm run build
+- npm run test
