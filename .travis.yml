@@ -8,27 +8,23 @@ matrix:
 
   - os: osx
     osx_image: xcode10.2
-    node_js: v10.16.3
-
-  - os: osx
-    osx_image: xcode10.2
-    node_js: v12.9.1
+    node_js: v13.2.0
 
   - os: osx
     osx_image: xcode10.1
-    node_js: v12.9.1
+    node_js: v13.2.0
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
   - os: osx
     osx_image: xcode9.2
-    node_js: v12.9.1
+    node_js: v13.2.0
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
   - os: osx
     osx_image: xcode8
-    node_js: v12.9.1
+    node_js: v13.2.0
     env:
     - HDI_MAC_DISABLE_TEST_APFS=1
 
