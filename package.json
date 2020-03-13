@@ -30,7 +30,7 @@
 	"repository": "https://github.com/shockpkg/hdi-mac.git",
 	"bugs": "https://github.com/shockpkg/hdi-mac/issues",
 	"author": "JrMasterModelBuilder",
-	"copyright": "Copyright (c) 2020 JrMasterModelBuilder",
+	"copyright": "Copyright (c) 2019-2020 JrMasterModelBuilder",
 	"license": "MPL-2.0",
 	"devDependencies": {
 		"@babel/core": "^7.8.7",
