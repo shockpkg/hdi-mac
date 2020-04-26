@@ -1,7 +1,7 @@
 {
 	"name": "@shockpkg/hdi-mac",
 	"description": "Package for handling hard disk images on macOS",
-	"version": "1.4.5",
+	"version": "1.4.6",
 	"keywords": [
 		"shockpkg",
 		"package",
