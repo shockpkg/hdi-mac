@@ -631,6 +631,12 @@ rules:
     - UPPER_CASE
     leadingUnderscore: require
     trailingUnderscore: require
+  - selector: accessor
+    format:
+    - camelCase
+    - PascalCase
+    - snake_case
+    - UPPER_CASE
 
 overrides:
 - files:
