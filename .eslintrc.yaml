@@ -594,17 +594,20 @@ rules:
     - public
     format:
     - camelCase
+    - PascalCase
   - selector: memberLike
     modifiers:
     - protected
     format:
     - camelCase
+    - PascalCase
     leadingUnderscore: require
   - selector: memberLike
     modifiers:
     - private
     format:
     - camelCase
+    - PascalCase
     leadingUnderscore: require
     trailingUnderscore: require
   - selector: memberLike
