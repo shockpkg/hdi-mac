@@ -80,7 +80,7 @@ export interface IMounterAttachInfo {
 	/**
 	 * Eject disk.
 	 */
-	eject(options?: IMounterEjectOptions | null): Promise<void>;
+	eject(options?: Readonly<IMounterEjectOptions> | null): Promise<void>;
 }
 
 /**
@@ -94,7 +94,7 @@ export class Mounter extends Object {
 	 */
 	public hdiutil: string;
 
-	constructor(options: IMounterOptions | null = null) {
+	constructor(options: Readonly<IMounterOptions> | null = null) {
 		super();
 
 		this.hdiutil = (options ? options.hdiutil : null) || 'hdiutil';
@@ -113,8 +113,8 @@ export class Mounter extends Object {
 	 */
 	public async attach(
 		file: string,
-		options: IMounterAttachOptions | null = null,
-		ejectOnShutdown: IMounterEjectOptions | null = null
+		options: Readonly<IMounterAttachOptions> | null = null,
+		ejectOnShutdown: Readonly<IMounterEjectOptions> | null = null
 	) {
 		// Assemble args.
 		const args = ['attach', '-plist'];
@@ -149,7 +149,7 @@ export class Mounter extends Object {
 	 */
 	public async eject(
 		file: string,
-		options: IMounterEjectOptions | null = null
+		options: Readonly<IMounterEjectOptions> | null = null
 	) {
 		// Assemble args.
 		const args = ['eject'];
@@ -168,7 +168,7 @@ export class Mounter extends Object {
 	 * @param args CLI args.
 	 * @returns Devices list.
 	 */
-	protected async _runAttach(args: string[]) {
+	protected async _runAttach(args: Readonly<string[]>) {
 		const {proc, done} = spawn(this.hdiutil, args);
 		const stdoutData: Buffer[] = [];
 		if (proc.stdout) {
@@ -191,7 +191,7 @@ export class Mounter extends Object {
 	 *
 	 * @param args CLI args.
 	 */
-	protected async _runEject(args: string[]) {
+	protected async _runEject(args: Readonly<string[]>) {
 		const {done} = spawn(this.hdiutil, args);
 
 		const code = await done;
@@ -304,7 +304,7 @@ export class Mounter extends Object {
 	 * @param devices Device list.
 	 * @returns Root device or null if an empty list.
 	 */
-	protected _findRootDevice(devices: IMounterDevice[]) {
+	protected _findRootDevice(devices: Readonly<Readonly<IMounterDevice>[]>) {
 		let r: IMounterDevice | null = null;
 		for (const device of devices) {
 			if (r === null || r.devEntry.length > device.devEntry.length) {
@@ -322,8 +322,8 @@ export class Mounter extends Object {
 	 * @returns Callback function.
 	 */
 	protected _createEject(
-		devices: IMounterDevice[],
-		ejectOnShutdown: IMounterEjectOptions | null = null
+		devices: Readonly<Readonly<IMounterDevice>[]>,
+		ejectOnShutdown: Readonly<IMounterEjectOptions> | null = null
 	) {
 		// Find the root device, to use to eject (none possible in theory).
 		const rootDev = this._findRootDevice(devices);

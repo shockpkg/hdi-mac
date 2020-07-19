@@ -44,11 +44,11 @@ async function stat(path: string) {
 }
 
 class MounterTestRun extends Mounter {
-	public attachArgs: string[] = [];
+	public attachArgs: Readonly<string[]> = [];
 
-	public ejectArgs: string[] = [];
+	public ejectArgs: Readonly<string[]> = [];
 
-	protected async _runAttach(args: string[]) {
+	protected async _runAttach(args: Readonly<string[]>) {
 		this.attachArgs = args;
 		return [
 			{
@@ -68,7 +68,7 @@ class MounterTestRun extends Mounter {
 		];
 	}
 
-	protected async _runEject(args: string[]) {
+	protected async _runEject(args: Readonly<string[]>) {
 		this.ejectArgs = args;
 	}
 }

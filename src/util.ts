@@ -18,8 +18,8 @@ import {
  */
 export function spawn(
 	command: string,
-	args: string[] | null = null,
-	options: SpawnOptions | SpawnOptionsWithoutStdio | null = null
+	args: Readonly<string[]> | null = null,
+	options: Readonly<SpawnOptions | SpawnOptionsWithoutStdio> | null = null
 ) {
 	const proc = childProcessSpawn(command, args || [], options || {});
 	const done = new Promise<number | null>((resolve, reject) => {
