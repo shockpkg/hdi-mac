@@ -1,4 +1,10 @@
-import plist from 'plist';
+import {
+	Plist,
+	ValueDict,
+	ValueArray,
+	ValueString,
+	ValueBoolean
+} from '@shockpkg/plist-dom';
 
 import {
 	shutdownHook,
@@ -219,80 +225,46 @@ export class Mounter extends Object {
 	 * @returns Devices list.
 	 */
 	protected _parseDevices(xml: string) {
-		const parsed = plist.parse(xml);
-
-		const errMsg = (s: string) => `Error parsing hdiutil plist: ${s}`;
-		if (!parsed) {
-			throw new Error(errMsg('root'));
-		}
-
-		const systemEntities = (parsed as any)['system-entities'];
-		if (!Array.isArray(systemEntities)) {
-			throw new Error(errMsg('system-entities'));
-		}
-
-		const entityProp = (entity: any, prop: string, type: string) => {
-			const r = entity[prop];
-			if (typeof r !== type) {
-				throw new Error(errMsg(`system-entities > * > ${prop}`));
-			}
-			return r;
-		};
-
-		const entityPropNull = (entity: any, prop: string, type: string) => {
-			if (prop in entity) {
-				return entityProp(entity, prop, type);
-			}
-			return null;
-		};
+		const plist = new Plist();
+		plist.fromXml(xml);
+		const systemEntities = plist.valueCastAs(ValueDict)
+			.getValue('system-entities')
+			.castAs(ValueArray);
 
 		const r: IMounterDevice[] = [];
-		for (const entity of systemEntities) {
-			if (!entity || typeof entity !== 'object') {
-				throw new Error(errMsg('system-entities > *'));
-			}
-
-			const devEntry = entityProp(
-				entity, 'dev-entry', 'string'
-			) as string;
-
-			const potentiallyMountable = entityProp(
-				entity, 'potentially-mountable', 'boolean'
-			) as boolean;
-
-			const contentHint = entityPropNull(
-				entity, 'content-hint', 'string'
-			) as string | null;
-
-			const unmappedContentHint = entityPropNull(
-				entity, 'unmapped-content-hint', 'string'
-			) as string | null;
-
-			const volumeKind = entityPropNull(
-				entity, 'volume-kind', 'string'
-			) as string | null;
-
-			const mountPoint = entityPropNull(
-				entity, 'mount-point', 'string'
-			) as string | null;
+		for (const value of systemEntities.value) {
+			const dict = value.castAs(ValueDict);
+			const devEntry = dict
+				.getValue('dev-entry')
+				.castAs(ValueString).value;
+			const potentiallyMountable = dict
+				.getValue('potentially-mountable')
+				.castAs(ValueBoolean).value;
+			const contentHint = dict.get('content-hint');
+			const unmappedContentHint = dict.get('unmapped-content-hint');
+			const volumeKind = dict.get('volume-kind');
+			const mountPoint = dict.get('mount-point');
 
 			const device: IMounterDevice = {
 				devEntry,
 				potentiallyMountable
 			};
-			if (contentHint !== null) {
-				device.contentHint = contentHint;
+			if (contentHint) {
+				device.contentHint = contentHint
+					.castAs(ValueString).value;
 			}
-			if (unmappedContentHint !== null) {
-				device.unmappedContentHint = unmappedContentHint;
+			if (unmappedContentHint) {
+				device.unmappedContentHint = unmappedContentHint
+					.castAs(ValueString).value;
 			}
-			if (volumeKind !== null) {
-				device.volumeKind = volumeKind;
+			if (volumeKind) {
+				device.volumeKind = volumeKind
+					.castAs(ValueString).value;
 			}
-			if (mountPoint !== null) {
-				device.mountPoint = mountPoint;
+			if (mountPoint) {
+				device.mountPoint = mountPoint
+					.castAs(ValueString).value;
 			}
-
 			r.push(device);
 		}
 		return r;
