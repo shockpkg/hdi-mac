@@ -12,18 +12,18 @@ jobs:
           NO_LINT: 1
 
         - runs-on: macos-10.15
-          node-version: '12.22.1' # LTS
+          node-version: '12.13.0' # LTS
           NO_LINT: 1
 
         - runs-on: macos-10.15
-          node-version: '14.17.0' # LTS
+          node-version: '14.15.0' # LTS
           NO_LINT: 1
 
         - runs-on: macos-10.15
-          node-version: '16.1.0'
+          node-version: '16.5.0'
 
         - runs-on: macos-11.0
-          node-version: '16.1.0'
+          node-version: '16.5.0'
 
     runs-on: ${{ matrix.config.runs-on }}
 
