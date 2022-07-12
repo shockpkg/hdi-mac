@@ -146,32 +146,25 @@ gulp.task('formatted', async () => {
 
 // build
 
-gulp.task('build:lib:dts', async () => {
+gulp.task('build:dts', async () => {
 	await exec('tsc');
 });
 
-gulp.task('build:lib:cjs', async () => {
+gulp.task('build:cjs', async () => {
 	await babelTarget(['src/**/*.ts'], 'lib', 'commonjs');
 });
 
-gulp.task('build:lib:mjs', async () => {
+gulp.task('build:mjs', async () => {
 	await babelTarget(['src/**/*.ts'], 'lib', false);
 });
 
-gulp.task(
-	'build:lib',
-	gulp.parallel(['build:lib:dts', 'build:lib:cjs', 'build:lib:mjs'])
-);
-
-gulp.task('build', gulp.parallel(['build:lib']));
+gulp.task('build', gulp.parallel(['build:dts', 'build:cjs', 'build:mjs']));
 
 // test
 
-gulp.task('test:node', async () => {
+gulp.task('test', async () => {
 	await exec('jasmine');
 });
-
-gulp.task('test', gulp.parallel(['test:node']));
 
 // watch
 
