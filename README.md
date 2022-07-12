@@ -5,7 +5,6 @@ Package for handling hard disk images on macOS
 [![npm](https://img.shields.io/npm/v/@shockpkg/hdi-mac.svg)](https://npmjs.com/package/@shockpkg/hdi-mac)
 [![node](https://img.shields.io/node/v/@shockpkg/hdi-mac.svg)](https://nodejs.org)
 
-[![dependencies](https://img.shields.io/david/shockpkg/hdi-mac)](https://david-dm.org/shockpkg/hdi-mac)
 [![size](https://packagephobia.now.sh/badge?p=@shockpkg/hdi-mac)](https://packagephobia.now.sh/result?p=@shockpkg/hdi-mac)
 [![downloads](https://img.shields.io/npm/dm/@shockpkg/hdi-mac.svg)](https://npmcharts.com/compare/@shockpkg/hdi-mac?minimal=true)
 
