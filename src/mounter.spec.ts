@@ -1,7 +1,5 @@
-import {
-	lstat,
-	readdir
-} from 'fs';
+/* eslint-disable max-nested-callbacks */
+import {lstat, readdir} from 'fs';
 import {promisify} from 'util';
 
 import {Mounter} from './mounter';
@@ -22,10 +20,10 @@ const fixtureTestDiskImages = [
 	'test-disk-image-hfsp-j.dmg',
 	'test-disk-image-hfsp-c.dmg',
 	'test-disk-image-hfsp-j-c.dmg',
-	testApfs ? 'test-disk-image-apfs.dmg' : null,
-	testApfs ? 'test-disk-image-apfs-c.dmg' : null
+	testApfs ? 'test-disk-image-apfs.dmg' : '',
+	testApfs ? 'test-disk-image-apfs-c.dmg' : ''
 ]
-	.filter(Boolean)
+	.filter(s => s.length)
 	.map(s => `${fixtures}/${s}`);
 
 async function dirlist(path: string, dotfiles = true) {
@@ -37,8 +35,7 @@ async function dirlist(path: string, dotfiles = true) {
 async function stat(path: string) {
 	try {
 		return await lstatP(path);
-	}
-	catch (err) {
+	} catch (err) {
 		return null;
 	}
 }
@@ -48,6 +45,7 @@ class MounterTestRun extends Mounter {
 
 	public ejectArgs: Readonly<string[]> = [];
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async _runAttach(args: Readonly<string[]>) {
 		this.attachArgs = args;
 		return [
@@ -68,6 +66,7 @@ class MounterTestRun extends Mounter {
 		];
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async _runEject(args: Readonly<string[]>) {
 		this.ejectArgs = args;
 	}
@@ -94,6 +93,7 @@ describe('mounter', () => {
 
 		describe('attach', () => {
 			for (const fixtureTestDiskImage of fixtureTestDiskImages) {
+				// eslint-disable-next-line no-loop-func
 				describe(fixtureTestDiskImage, () => {
 					it('no options', async () => {
 						const mounter = new MounterTestRun();
@@ -176,38 +176,42 @@ describe('mounter', () => {
 						expect(mounter.attachArgs).toContain(`./${dummy}`);
 					});
 
-					it('hdi attach and eject', async () => {
-						const mounter = new Mounter();
-						const info = await mounter.attach(
-							fixtureTestDiskImage,
-							null,
-							{}
-						);
+					it(
+						'hdi attach and eject',
+						async () => {
+							const mounter = new Mounter();
+							const info = await mounter.attach(
+								fixtureTestDiskImage,
+								null,
+								{}
+							);
 
-						let mountPoint: string | null = null;
-						for (const device of info.devices) {
-							if (device.mountPoint) {
-								// eslint-disable-next-line prefer-destructuring
-								mountPoint = device.mountPoint;
+							let mountPoint: string | null = null;
+							for (const device of info.devices) {
+								if (device.mountPoint) {
+									// eslint-disable-next-line prefer-destructuring
+									mountPoint = device.mountPoint;
+								}
 							}
-						}
-						expect(typeof mountPoint).toBe('string');
-						if (mountPoint) {
-							const listing = await dirlist(mountPoint);
-							expect(listing).toEqual([
-								'file-a.txt',
-								'file-b.txt',
-								'file-c.txt'
-							]);
-						}
+							expect(typeof mountPoint).toBe('string');
+							if (mountPoint) {
+								const listing = await dirlist(mountPoint);
+								expect(listing).toEqual([
+									'file-a.txt',
+									'file-b.txt',
+									'file-c.txt'
+								]);
+							}
 
-						await info.eject();
+							await info.eject();
 
-						if (mountPoint) {
-							const st = await stat(mountPoint);
-							expect(st).toBeNull();
-						}
-					}, mountTimeout);
+							if (mountPoint) {
+								const st = await stat(mountPoint);
+								expect(st).toBeNull();
+							}
+						},
+						mountTimeout
+					);
 				});
 			}
 		});

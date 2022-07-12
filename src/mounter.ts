@@ -6,14 +6,10 @@ import {
 	ValueBoolean
 } from '@shockpkg/plist-dom';
 
-import {
-	shutdownHook,
-	shutdownUnhook,
-	spawn
-} from './util';
+import {shutdownHook, shutdownUnhook, spawn} from './util';
 
 export interface IMounterOptions {
-
+	//
 	/**
 	 * The path for hdiutil.
 	 *
@@ -23,7 +19,7 @@ export interface IMounterOptions {
 }
 
 export interface IMounterAttachOptions {
-
+	//
 	/**
 	 * Force the devices to be read-only.
 	 */
@@ -36,7 +32,7 @@ export interface IMounterAttachOptions {
 }
 
 export interface IMounterEjectOptions {
-
+	//
 	/**
 	 * Forcibly detach.
 	 */
@@ -44,7 +40,7 @@ export interface IMounterEjectOptions {
 }
 
 export interface IMounterDevice {
-
+	//
 	/**
 	 * The dev-entry hdiutil info.
 	 */
@@ -77,7 +73,7 @@ export interface IMounterDevice {
 }
 
 export interface IMounterAttachInfo {
-
+	//
 	/**
 	 * Device list.
 	 */
@@ -90,9 +86,7 @@ export interface IMounterAttachInfo {
 }
 
 /**
- * Mounter constructor.
- *
- * @param options Options object.
+ * Mounter object.
  */
 export class Mounter extends Object {
 	/**
@@ -100,6 +94,11 @@ export class Mounter extends Object {
 	 */
 	public hdiutil: string;
 
+	/**
+	 * Mounter constructor.
+	 *
+	 * @param options Options object.
+	 */
 	constructor(options: Readonly<IMounterOptions> | null = null) {
 		super();
 
@@ -178,7 +177,7 @@ export class Mounter extends Object {
 		const {proc, done} = spawn(this.hdiutil, args);
 		const stdoutData: Buffer[] = [];
 		if (proc.stdout) {
-			proc.stdout.on('data', data => {
+			proc.stdout.on('data', (data: Buffer) => {
 				stdoutData.push(data);
 			});
 		}
@@ -227,7 +226,8 @@ export class Mounter extends Object {
 	protected _parseDevices(xml: string) {
 		const plist = new Plist();
 		plist.fromXml(xml);
-		const systemEntities = plist.valueCastAs(ValueDict)
+		const systemEntities = plist
+			.valueCastAs(ValueDict)
 			.getValue('system-entities')
 			.castAs(ValueArray);
 
@@ -250,20 +250,17 @@ export class Mounter extends Object {
 				potentiallyMountable
 			};
 			if (contentHint) {
-				device.contentHint = contentHint
-					.castAs(ValueString).value;
+				device.contentHint = contentHint.castAs(ValueString).value;
 			}
 			if (unmappedContentHint) {
-				device.unmappedContentHint = unmappedContentHint
-					.castAs(ValueString).value;
+				device.unmappedContentHint =
+					unmappedContentHint.castAs(ValueString).value;
 			}
 			if (volumeKind) {
-				device.volumeKind = volumeKind
-					.castAs(ValueString).value;
+				device.volumeKind = volumeKind.castAs(ValueString).value;
 			}
 			if (mountPoint) {
-				device.mountPoint = mountPoint
-					.castAs(ValueString).value;
+				device.mountPoint = mountPoint.castAs(ValueString).value;
 			}
 			r.push(device);
 		}
@@ -301,9 +298,13 @@ export class Mounter extends Object {
 		const rootDev = this._findRootDevice(devices);
 		const rootDevPath = rootDev ? rootDev.devEntry : null;
 
-		let shutdownEjector: any = null;
+		let shutdownEjector: (() => any) | null = null;
 
-		// The eject callback function.
+		/**
+		 * The eject callback function.
+		 *
+		 * @param options  Eject options.
+		 */
 		const eject = async (options: IMounterEjectOptions | null = null) => {
 			// If shutdown ejector registered, remove now.
 			if (shutdownEjector) {
@@ -320,6 +321,9 @@ export class Mounter extends Object {
 
 		// Possibly register shutdown hook, using the eject options.
 		if (rootDevPath && ejectOnShutdown) {
+			/**
+			 * Shutdown ejector.
+			 */
 			shutdownEjector = async () => {
 				await eject(ejectOnShutdown);
 			};

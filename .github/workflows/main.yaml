@@ -9,18 +9,22 @@ jobs:
         config:
           - runs-on: macos-10.15
             node-version: '10.13.0' # LTS
+            NO_FORMATTED: 1
             NO_LINT: 1
 
           - runs-on: macos-10.15
             node-version: '12.13.0' # LTS
+            NO_FORMATTED: 1
             NO_LINT: 1
 
           - runs-on: macos-10.15
             node-version: '14.15.0' # LTS
+            NO_FORMATTED: 1
             NO_LINT: 1
 
           - runs-on: macos-10.15
             node-version: '16.13.0' # LTS
+            NO_FORMATTED: 1
             NO_LINT: 1
 
           - runs-on: macos-10.15
@@ -58,6 +62,10 @@ jobs:
       - name: Lint
         run: npm run lint
         if: matrix.config.NO_LINT != 1
+
+      - name: Formatted
+        run: npm run formatted
+        if: matrix.config.NO_FORMATTED != 1
 
   publish:
     if: startsWith(github.ref, 'refs/tags/')

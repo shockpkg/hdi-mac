@@ -4,9 +4,7 @@ import {
 	SpawnOptionsWithoutStdio
 } from 'child_process';
 
-import {
-	asyncExitHook
-} from './untyped';
+import {asyncExitHook} from './untyped';
 
 /**
  * Spawn a subprocess with a promise for completion.
@@ -37,6 +35,10 @@ export function spawn(
 }
 
 const exitHooks = new Set<() => Promise<any>>();
+
+/**
+ * Exit handler.
+ */
 const exitHandler = async () => {
 	if (!exitHooks.size) {
 		return;
@@ -45,6 +47,7 @@ const exitHandler = async () => {
 	exitHooks.clear();
 	await Promise.all(list.map(async f => f()));
 };
+
 let exitHooked = false;
 
 /**
@@ -54,10 +57,14 @@ let exitHooked = false;
  */
 export function shutdownHook(callback: () => Promise<any>) {
 	if (!exitHooked) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		asyncExitHook((cb: any) => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			exitHandler().then(cb, cb);
 		});
-		asyncExitHook.uncaughtExceptionHandler((e: any, cb: any) => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+		asyncExitHook.uncaughtExceptionHandler((e: () => unknown, cb: any) => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			exitHandler().then(cb, cb);
 		});
 		exitHooked = true;

@@ -10,7 +10,6 @@ Package for handling hard disk images on macOS
 
 [![Build Status](https://github.com/shockpkg/hdi-mac/workflows/main/badge.svg?branch=master)](https://github.com/shockpkg/hdi-mac/actions?query=workflow%3Amain+branch%3Amaster)
 
-
 # Overview
 
 A simple hdiutil wrapper for handling hard disk images in macOS.
@@ -22,7 +21,6 @@ Currently mounting and ejecting disk images is supported.
 Fully wrapping all available hdiutil features is out of scope for this project.
 
 Only functions on macOS, as it depends on the macOS hdiutil, but safe to import or require on all platforms.
-
 
 # Usage
 
@@ -43,11 +41,9 @@ main().catch(err => {
 });
 ```
 
-
 # Bugs
 
 If you find a bug or have compatibility issues, please open a ticket under issues section for this repository.
-
 
 # License
 
