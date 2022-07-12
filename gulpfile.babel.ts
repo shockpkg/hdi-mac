@@ -154,17 +154,23 @@ gulp.task('build:cjs', async () => {
 	await babelTarget(['src/**/*.ts'], 'lib', 'commonjs');
 });
 
-gulp.task('build:mjs', async () => {
+gulp.task('build:esm', async () => {
 	await babelTarget(['src/**/*.ts'], 'lib', false);
 });
 
-gulp.task('build', gulp.parallel(['build:dts', 'build:cjs', 'build:mjs']));
+gulp.task('build', gulp.parallel(['build:dts', 'build:cjs', 'build:esm']));
 
 // test
 
-gulp.task('test', async () => {
+gulp.task('test:cjs', async () => {
 	await exec('jasmine');
 });
+
+gulp.task('test:esm', async () => {
+	await exec('jasmine', ['--config=spec/support/jasmine.esm.json']);
+});
+
+gulp.task('test', gulp.series(['test:cjs', 'test:esm']));
 
 // watch
 
@@ -172,7 +178,25 @@ gulp.task('watch', () => {
 	gulp.watch(['src/**/*'], gulp.series(['all']));
 });
 
+gulp.task('watch:cjs', () => {
+	gulp.watch(['src/**/*'], gulp.series(['all:cjs']));
+});
+
+gulp.task('watch:esm', () => {
+	gulp.watch(['src/**/*'], gulp.series(['all:esm']));
+});
+
 // all
+
+gulp.task(
+	'all:cjs',
+	gulp.series(['clean', 'build:cjs', 'test:cjs', 'lint', 'formatted'])
+);
+
+gulp.task(
+	'all:esm',
+	gulp.series(['clean', 'build:esm', 'test:esm', 'lint', 'formatted'])
+);
 
 gulp.task('all', gulp.series(['clean', 'build', 'test', 'lint', 'formatted']));
 
