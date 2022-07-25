@@ -91,6 +91,7 @@
 	},
 	"dependencies": {
 		"@shockpkg/plist-dom": "^2.1.1",
+		"@types/async-exit-hook": "^2.0.0",
 		"async-exit-hook": "^2.0.1"
 	}
 }
