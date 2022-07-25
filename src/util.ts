@@ -53,19 +53,15 @@ let exitHooked = false;
  */
 export function shutdownHook(callback: () => Promise<any>) {
 	if (!exitHooked) {
-		asyncExitHook((cb: () => unknown) => {
-			exitHandler().then(cb, cb);
+		asyncExitHook(done => {
+			exitHandler().then(done, done);
 		});
-		asyncExitHook.uncaughtExceptionHandler(
-			(e: unknown, cb: () => unknown) => {
-				exitHandler().then(cb, cb);
-			}
-		);
-		asyncExitHook.unhandledRejectionHandler(
-			(e: unknown, cb: () => unknown) => {
-				exitHandler().then(cb, cb);
-			}
-		);
+		asyncExitHook.uncaughtExceptionHandler((_error, done) => {
+			exitHandler().then(done, done);
+		});
+		asyncExitHook.unhandledRejectionHandler((_error, done) => {
+			exitHandler().then(done, done);
+		});
 		exitHooked = true;
 	}
 	exitHooks.add(callback);
