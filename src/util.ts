@@ -21,12 +21,8 @@ export function spawn(
 ) {
 	const proc = childProcessSpawn(command, args || [], options || {});
 	const done = new Promise<number | null>((resolve, reject) => {
-		proc.on('exit', code => {
-			resolve(code);
-		});
-		proc.on('error', err => {
-			reject(err);
-		});
+		proc.on('exit', resolve);
+		proc.on('error', reject);
 	});
 	return {
 		proc,
