@@ -88,7 +88,7 @@ export interface IMounterAttachInfo {
 /**
  * Mounter object.
  */
-export class Mounter extends Object {
+export class Mounter {
 	/**
 	 * The path to hdiutil.
 	 */
@@ -100,8 +100,6 @@ export class Mounter extends Object {
 	 * @param options Options object.
 	 */
 	constructor(options: Readonly<IMounterOptions> | null = null) {
-		super();
-
 		this.hdiutil = (options ? options.hdiutil : null) || 'hdiutil';
 	}
 
