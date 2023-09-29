@@ -211,8 +211,7 @@ export class Mounter {
 	 */
 	protected _fileArg(file: string) {
 		// Make sure it will not be recognized as option argument.
-		// eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
-		return file.charAt(0) === '-' ? `./${file}` : file;
+		return file.startsWith('-') ? `./${file}` : file;
 	}
 
 	/**

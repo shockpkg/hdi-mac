@@ -1,8 +1,8 @@
 /* eslint-disable max-nested-callbacks */
 import {describe, it} from 'node:test';
 import {deepStrictEqual, ok, strictEqual} from 'node:assert';
-import {lstat, readdir} from 'fs';
-import {promisify} from 'util';
+import {lstat, readdir} from 'node:fs';
+import {promisify} from 'node:util';
 
 import {Mounter} from './mounter';
 
@@ -28,8 +28,7 @@ const fixtureTestDiskImages = [
 
 async function dirlist(path: string, dotfiles = true) {
 	const r = await readdirP(path);
-	// eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
-	return r.filter(s => (s.charAt(0) === '.' ? dotfiles : true)).sort();
+	return r.filter(s => (s.startsWith('.') ? dotfiles : true)).sort();
 }
 
 async function stat(path: string) {
@@ -93,7 +92,6 @@ void describe('mounter', () => {
 
 		void describe('attach', () => {
 			for (const fixtureTestDiskImage of fixtureTestDiskImages) {
-				// eslint-disable-next-line no-loop-func
 				void describe(fixtureTestDiskImage, () => {
 					void it('no options', async () => {
 						const mounter = new MounterTestRun();
@@ -187,8 +185,7 @@ void describe('mounter', () => {
 						let mountPoint: string | null = null;
 						for (const device of info.devices) {
 							if (device.mountPoint) {
-								// eslint-disable-next-line prefer-destructuring
-								mountPoint = device.mountPoint;
+								mountPoint = device.mountPoint || null;
 							}
 						}
 						strictEqual(typeof mountPoint, 'string');

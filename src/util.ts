@@ -2,7 +2,7 @@ import {
 	spawn as childProcessSpawn,
 	SpawnOptions,
 	SpawnOptionsWithoutStdio
-} from 'child_process';
+} from 'node:child_process';
 
 import asyncExitHook from 'async-exit-hook';
 
