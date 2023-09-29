@@ -1,4 +1,6 @@
 /* eslint-disable max-nested-callbacks */
+import {describe, it} from 'node:test';
+import {deepStrictEqual, ok, strictEqual} from 'node:assert';
 import {lstat, readdir} from 'fs';
 import {promisify} from 'util';
 
@@ -6,8 +8,6 @@ import {Mounter} from './mounter';
 
 const readdirP = promisify(readdir);
 const lstatP = promisify(lstat);
-
-const mountTimeout = 1000 * 60;
 
 const fixtures = './spec/fixtures';
 
@@ -78,7 +78,7 @@ describe('mounter', () => {
 			it('no options', () => {
 				const mounter = new Mounter();
 
-				expect(mounter.hdiutil).toBe('hdiutil');
+				strictEqual(mounter.hdiutil, 'hdiutil');
 			});
 
 			it('option: hdiutil', () => {
@@ -87,7 +87,7 @@ describe('mounter', () => {
 					hdiutil: dummy
 				});
 
-				expect(mounter.hdiutil).toBe(dummy);
+				strictEqual(mounter.hdiutil, dummy);
 			});
 		});
 
@@ -99,8 +99,8 @@ describe('mounter', () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage);
 
-						expect(mounter.attachArgs).not.toContain('-readonly');
-						expect(mounter.attachArgs).not.toContain('-nobrowse');
+						ok(!mounter.attachArgs.includes('-readonly'));
+						ok(!mounter.attachArgs.includes('-nobrowse'));
 					});
 
 					it('option: readonly = true', async () => {
@@ -109,7 +109,7 @@ describe('mounter', () => {
 							readonly: true
 						});
 
-						expect(mounter.attachArgs).toContain('-readonly');
+						ok(mounter.attachArgs.includes('-readonly'));
 					});
 
 					it('option: readonly = false', async () => {
@@ -118,7 +118,7 @@ describe('mounter', () => {
 							readonly: false
 						});
 
-						expect(mounter.attachArgs).not.toContain('-readonly');
+						ok(!mounter.attachArgs.includes('-readonly'));
 					});
 
 					it('option: nobrowse = true', async () => {
@@ -127,7 +127,7 @@ describe('mounter', () => {
 							nobrowse: true
 						});
 
-						expect(mounter.attachArgs).toContain('-nobrowse');
+						ok(mounter.attachArgs.includes('-nobrowse'));
 					});
 
 					it('option: nobrowse = false', async () => {
@@ -136,7 +136,7 @@ describe('mounter', () => {
 							nobrowse: false
 						});
 
-						expect(mounter.attachArgs).not.toContain('-nobrowse');
+						ok(!mounter.attachArgs.includes('-nobrowse'));
 					});
 
 					it('eject: no options', async () => {
@@ -144,7 +144,7 @@ describe('mounter', () => {
 						const info = await mounter.attach(fixtureTestDiskImage);
 
 						await info.eject();
-						expect(mounter.ejectArgs).toContain('/dev/disk42');
+						ok(mounter.ejectArgs.includes('/dev/disk42'));
 					});
 
 					it('eject: force = false', async () => {
@@ -154,7 +154,7 @@ describe('mounter', () => {
 						await info.eject({
 							force: false
 						});
-						expect(mounter.ejectArgs).not.toContain('-force');
+						ok(!mounter.ejectArgs.includes('-force'));
 					});
 
 					it('eject: force = true', async () => {
@@ -164,7 +164,7 @@ describe('mounter', () => {
 						await info.eject({
 							force: true
 						});
-						expect(mounter.ejectArgs).toContain('-force');
+						ok(mounter.ejectArgs.includes('-force'));
 					});
 
 					it('file not an argument', async () => {
@@ -172,46 +172,42 @@ describe('mounter', () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(dummy);
 
-						expect(mounter.attachArgs).not.toContain(dummy);
-						expect(mounter.attachArgs).toContain(`./${dummy}`);
+						ok(!mounter.attachArgs.includes(dummy));
+						ok(mounter.attachArgs.includes(`./${dummy}`));
 					});
 
-					it(
-						'hdi attach and eject',
-						async () => {
-							const mounter = new Mounter();
-							const info = await mounter.attach(
-								fixtureTestDiskImage,
-								null,
-								{}
-							);
+					it('hdi attach and eject', async () => {
+						const mounter = new Mounter();
+						const info = await mounter.attach(
+							fixtureTestDiskImage,
+							null,
+							{}
+						);
 
-							let mountPoint: string | null = null;
-							for (const device of info.devices) {
-								if (device.mountPoint) {
-									// eslint-disable-next-line prefer-destructuring
-									mountPoint = device.mountPoint;
-								}
+						let mountPoint: string | null = null;
+						for (const device of info.devices) {
+							if (device.mountPoint) {
+								// eslint-disable-next-line prefer-destructuring
+								mountPoint = device.mountPoint;
 							}
-							expect(typeof mountPoint).toBe('string');
-							if (mountPoint) {
-								const listing = await dirlist(mountPoint);
-								expect(listing).toEqual([
-									'file-a.txt',
-									'file-b.txt',
-									'file-c.txt'
-								]);
-							}
+						}
+						strictEqual(typeof mountPoint, 'string');
+						if (mountPoint) {
+							const listing = await dirlist(mountPoint);
+							deepStrictEqual(listing, [
+								'file-a.txt',
+								'file-b.txt',
+								'file-c.txt'
+							]);
+						}
 
-							await info.eject();
+						await info.eject();
 
-							if (mountPoint) {
-								const st = await stat(mountPoint);
-								expect(st).toBeNull();
-							}
-						},
-						mountTimeout
-					);
+						if (mountPoint) {
+							const st = await stat(mountPoint);
+							strictEqual(st, null);
+						}
+					});
 				});
 			}
 		});
