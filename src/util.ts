@@ -30,7 +30,7 @@ export function spawn(
 	};
 }
 
-const exitHooks = new Set<() => Promise<any>>();
+const exitHooks = new Set<() => Promise<unknown>>();
 
 /**
  * Exit handler.
@@ -51,7 +51,7 @@ let exitHooked = false;
  *
  * @param callback Callback function.
  */
-export function shutdownHook(callback: () => Promise<any>) {
+export function shutdownHook(callback: () => Promise<unknown>) {
 	if (!exitHooked) {
 		asyncExitHook(done => {
 			exitHandler().then(done, done);
@@ -72,6 +72,6 @@ export function shutdownHook(callback: () => Promise<any>) {
  *
  * @param callback Callback function.
  */
-export function shutdownUnhook(callback: () => Promise<any>) {
+export function shutdownUnhook(callback: () => Promise<unknown>) {
 	exitHooks.delete(callback);
 }

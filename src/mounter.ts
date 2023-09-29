@@ -296,7 +296,7 @@ export class Mounter {
 		const rootDev = this._findRootDevice(devices);
 		const rootDevPath = rootDev ? rootDev.devEntry : null;
 
-		let shutdownEjector: (() => any) | null = null;
+		let shutdownEjector: (() => Promise<unknown>) | null = null;
 
 		/**
 		 * The eject callback function.

@@ -72,16 +72,16 @@ class MounterTestRun extends Mounter {
 	}
 }
 
-describe('mounter', () => {
-	describe('Mounter', () => {
-		describe('constructor', () => {
-			it('no options', () => {
+void describe('mounter', () => {
+	void describe('Mounter', () => {
+		void describe('constructor', () => {
+			void it('no options', () => {
 				const mounter = new Mounter();
 
 				strictEqual(mounter.hdiutil, 'hdiutil');
 			});
 
-			it('option: hdiutil', () => {
+			void it('option: hdiutil', () => {
 				const dummy = '/tmp/dummy';
 				const mounter = new Mounter({
 					hdiutil: dummy
@@ -91,11 +91,11 @@ describe('mounter', () => {
 			});
 		});
 
-		describe('attach', () => {
+		void describe('attach', () => {
 			for (const fixtureTestDiskImage of fixtureTestDiskImages) {
 				// eslint-disable-next-line no-loop-func
-				describe(fixtureTestDiskImage, () => {
-					it('no options', async () => {
+				void describe(fixtureTestDiskImage, () => {
+					void it('no options', async () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage);
 
@@ -103,7 +103,7 @@ describe('mounter', () => {
 						ok(!mounter.attachArgs.includes('-nobrowse'));
 					});
 
-					it('option: readonly = true', async () => {
+					void it('option: readonly = true', async () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage, {
 							readonly: true
@@ -112,7 +112,7 @@ describe('mounter', () => {
 						ok(mounter.attachArgs.includes('-readonly'));
 					});
 
-					it('option: readonly = false', async () => {
+					void it('option: readonly = false', async () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage, {
 							readonly: false
@@ -121,7 +121,7 @@ describe('mounter', () => {
 						ok(!mounter.attachArgs.includes('-readonly'));
 					});
 
-					it('option: nobrowse = true', async () => {
+					void it('option: nobrowse = true', async () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage, {
 							nobrowse: true
@@ -130,7 +130,7 @@ describe('mounter', () => {
 						ok(mounter.attachArgs.includes('-nobrowse'));
 					});
 
-					it('option: nobrowse = false', async () => {
+					void it('option: nobrowse = false', async () => {
 						const mounter = new MounterTestRun();
 						await mounter.attach(fixtureTestDiskImage, {
 							nobrowse: false
@@ -139,7 +139,7 @@ describe('mounter', () => {
 						ok(!mounter.attachArgs.includes('-nobrowse'));
 					});
 
-					it('eject: no options', async () => {
+					void it('eject: no options', async () => {
 						const mounter = new MounterTestRun();
 						const info = await mounter.attach(fixtureTestDiskImage);
 
@@ -147,7 +147,7 @@ describe('mounter', () => {
 						ok(mounter.ejectArgs.includes('/dev/disk42'));
 					});
 
-					it('eject: force = false', async () => {
+					void it('eject: force = false', async () => {
 						const mounter = new MounterTestRun();
 						const info = await mounter.attach(fixtureTestDiskImage);
 
@@ -157,7 +157,7 @@ describe('mounter', () => {
 						ok(!mounter.ejectArgs.includes('-force'));
 					});
 
-					it('eject: force = true', async () => {
+					void it('eject: force = true', async () => {
 						const mounter = new MounterTestRun();
 						const info = await mounter.attach(fixtureTestDiskImage);
 
@@ -167,7 +167,7 @@ describe('mounter', () => {
 						ok(mounter.ejectArgs.includes('-force'));
 					});
 
-					it('file not an argument', async () => {
+					void it('file not an argument', async () => {
 						const dummy = '-test.dmg';
 						const mounter = new MounterTestRun();
 						await mounter.attach(dummy);
@@ -176,7 +176,7 @@ describe('mounter', () => {
 						ok(mounter.attachArgs.includes(`./${dummy}`));
 					});
 
-					it('hdi attach and eject', async () => {
+					void it('hdi attach and eject', async () => {
 						const mounter = new Mounter();
 						const info = await mounter.attach(
 							fixtureTestDiskImage,
