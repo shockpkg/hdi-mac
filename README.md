@@ -29,16 +29,10 @@ Only functions on macOS, as it depends on the macOS hdiutil, but safe to import 
 ```js
 import {Mounter} from '@shockpkg/hdi-mac';
 
-async function main() {
-	const mounter = new Mounter();
-	const {devices, eject} = await mounter.attach('path/to/diskimage.dmg');
-	console.log(devices);
-	await eject();
-}
-main().catch(err => {
-	process.exitCode = 1;
-	console.error(err);
-});
+const mounter = new Mounter();
+const {devices, eject} = await mounter.attach('path/to/diskimage.dmg');
+console.log(devices);
+await eject();
 ```
 
 # Bugs
