@@ -1,4 +1,4 @@
-import {spawn} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 
 import {
 	Plist,
@@ -121,29 +121,12 @@ export class Mounter {
 		options: Readonly<IMounterAttachOptions> | null = null,
 		ejectOnShutdown: Readonly<IMounterEjectOptions> | null = null
 	) {
-		// Assemble args.
-		const args = ['attach', '-plist'];
-		if (options) {
-			if (options.readonly) {
-				args.push('-readonly');
-			}
-			if (options.nobrowse) {
-				args.push('-nobrowse');
-			}
-		}
-		args.push(this._fileArg(file));
-
-		// Run command.
-		const devices = await this._runAttach(args);
-
-		// Create the eject callback.
+		const devices = await this._runAttach(this._argsAttach(file, options));
 		const eject = this._createEject(devices, ejectOnShutdown);
-
-		const info: IMounterAttachInfo = {
+		return {
 			devices,
 			eject
-		};
-		return info;
+		} as IMounterAttachInfo;
 	}
 
 	/**
@@ -156,15 +139,64 @@ export class Mounter {
 		file: string,
 		options: Readonly<IMounterEjectOptions> | null = null
 	) {
-		// Assemble args.
+		await this._runEject(this._argsEject(file, options));
+	}
+
+	/**
+	 * Eject a disk image.
+	 *
+	 * @param file Path to device file or volume mount point.
+	 * @param options Options object.
+	 */
+	public ejectSync(
+		file: string,
+		options: Readonly<IMounterEjectOptions> | null = null
+	) {
+		// eslint-disable-next-line no-sync
+		this._runEjectSync(this._argsEject(file, options));
+	}
+
+	/**
+	 * Create args for attach.
+	 *
+	 * @param file Path to disk image.
+	 * @param options Options object.
+	 * @returns Argument list.
+	 */
+	protected _argsAttach(
+		file: string,
+		options: Readonly<IMounterAttachOptions> | null = null
+	) {
+		const args = ['attach', '-plist'];
+		if (options) {
+			if (options.readonly) {
+				args.push('-readonly');
+			}
+			if (options.nobrowse) {
+				args.push('-nobrowse');
+			}
+		}
+		args.push(this._fileArg(file));
+		return args;
+	}
+
+	/**
+	 * Create args for eject.
+	 *
+	 * @param file Path to device file or volume mount point.
+	 * @param options Options object.
+	 * @returns Argument list.
+	 */
+	protected _argsEject(
+		file: string,
+		options: Readonly<IMounterEjectOptions> | null = null
+	) {
 		const args = ['eject'];
 		if (options && options.force) {
 			args.push('-force');
 		}
 		args.push(this._fileArg(file));
-
-		// Run command.
-		await this._runEject(args);
+		return args;
 	}
 
 	/**
@@ -196,12 +228,27 @@ export class Mounter {
 	 */
 	protected async _runEject(args: Readonly<string[]>) {
 		const proc = spawn(this.hdiutil, args);
-		const code = await new Promise<number | null>((resolve, reject) => {
+		const status = await new Promise<number | null>((resolve, reject) => {
 			proc.once('exit', resolve);
 			proc.once('error', reject);
 		});
-		if (code) {
-			throw new Error(`Eject failed: hdiutil exit code: ${code}`);
+		if (status) {
+			throw new Error(`Eject failed: hdiutil exit code: ${status}`);
+		}
+	}
+
+	/**
+	 * Run hdiutil eject command.
+	 *
+	 * @param args CLI args.
+	 */
+	protected _runEjectSync(args: Readonly<string[]>) {
+		const {status, error} = spawnSync(this.hdiutil, args);
+		if (error) {
+			throw error;
+		}
+		if (status) {
+			throw new Error(`Eject failed: hdiutil exit code: ${status}`);
 		}
 	}
 
