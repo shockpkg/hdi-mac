@@ -71,7 +71,6 @@
 		"typescript": "^5.2.2"
 	},
 	"dependencies": {
-		"@shockpkg/plist-dom": "^4.0.1",
-		"async-exit-hook": "^2.0.1"
+		"@shockpkg/plist-dom": "^4.0.1"
 	}
 }
