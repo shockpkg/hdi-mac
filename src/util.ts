@@ -1,34 +1,4 @@
-import {
-	spawn as childProcessSpawn,
-	SpawnOptions,
-	SpawnOptionsWithoutStdio
-} from 'node:child_process';
-
 import asyncExitHook from 'async-exit-hook';
-
-/**
- * Spawn a subprocess with a promise for completion.
- *
- * @param command Command path.
- * @param args Argument list.
- * @param options Options object.
- * @returns Info object.
- */
-export function spawn(
-	command: string,
-	args: Readonly<string[]> | null = null,
-	options: Readonly<SpawnOptions | SpawnOptionsWithoutStdio> | null = null
-) {
-	const proc = childProcessSpawn(command, args || [], options || {});
-	const done = new Promise<number | null>((resolve, reject) => {
-		proc.on('exit', resolve);
-		proc.on('error', reject);
-	});
-	return {
-		proc,
-		done
-	};
-}
 
 const exitHooks = new Set<() => Promise<unknown>>();
 

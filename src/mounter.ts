@@ -1,3 +1,5 @@
+import {spawn} from 'node:child_process';
+
 import {
 	Plist,
 	ValueDict,
@@ -6,7 +8,7 @@ import {
 	ValueBoolean
 } from '@shockpkg/plist-dom';
 
-import {shutdownHook, shutdownUnhook, spawn} from './util';
+import {shutdownHook, shutdownUnhook} from './util';
 
 export interface IMounterOptions {
 	//
@@ -172,21 +174,19 @@ export class Mounter {
 	 * @returns Devices list.
 	 */
 	protected async _runAttach(args: Readonly<string[]>) {
-		const {proc, done} = spawn(this.hdiutil, args);
-		const stdoutData: Buffer[] = [];
-		if (proc.stdout) {
-			proc.stdout.on('data', (data: Buffer) => {
-				stdoutData.push(data);
-			});
-		}
-
-		const code = await done;
+		const stdouts: Buffer[] = [];
+		const proc = spawn(this.hdiutil, args);
+		proc.stdout.on('data', (data: Buffer) => {
+			stdouts.push(data);
+		});
+		const code = await new Promise<number | null>((resolve, reject) => {
+			proc.once('exit', resolve);
+			proc.once('error', reject);
+		});
 		if (code) {
 			throw new Error(`Attach failed: hdiutil exit code: ${code}`);
 		}
-		const stdout = Buffer.concat(stdoutData).toString();
-
-		return this._parseDevices(stdout);
+		return this._parseDevices(Buffer.concat(stdouts).toString());
 	}
 
 	/**
@@ -195,9 +195,11 @@ export class Mounter {
 	 * @param args CLI args.
 	 */
 	protected async _runEject(args: Readonly<string[]>) {
-		const {done} = spawn(this.hdiutil, args);
-
-		const code = await done;
+		const proc = spawn(this.hdiutil, args);
+		const code = await new Promise<number | null>((resolve, reject) => {
+			proc.once('exit', resolve);
+			proc.once('error', reject);
+		});
 		if (code) {
 			throw new Error(`Eject failed: hdiutil exit code: ${code}`);
 		}
