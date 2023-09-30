@@ -1,14 +1,10 @@
 /* eslint-disable max-nested-callbacks */
 import {describe, it} from 'node:test';
 import {deepStrictEqual, ok, strictEqual} from 'node:assert';
-import {lstat, readdir} from 'node:fs';
-import {promisify} from 'node:util';
+import {lstat, readdir} from 'node:fs/promises';
 import {platform, release} from 'node:os';
 
 import {Mounter} from './mounter';
-
-const readdirP = promisify(readdir);
-const lstatP = promisify(lstat);
 
 const fixtures = './spec/fixtures';
 
@@ -30,17 +26,8 @@ const fixtureTestDiskImages = [
 	.filter(s => s.length)
 	.map(s => `${fixtures}/${s}`);
 
-async function dirlist(path: string, dotfiles = true) {
-	const r = await readdirP(path);
-	return r.filter(s => (s.startsWith('.') ? dotfiles : true)).sort();
-}
-
-async function stat(path: string) {
-	try {
-		return await lstatP(path);
-	} catch (err) {
-		return null;
-	}
+async function dirlist(path: string) {
+	return (await readdir(path)).filter(s => !s.startsWith('.')).sort();
 }
 
 class MounterTestRun extends Mounter {
@@ -230,7 +217,9 @@ void describe('mounter', () => {
 							}
 
 							if (mountPoint) {
-								const st = await stat(mountPoint);
+								const st = await lstat(mountPoint).catch(
+									() => null
+								);
 								strictEqual(st, null);
 							}
 						});
