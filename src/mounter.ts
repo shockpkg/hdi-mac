@@ -8,8 +8,6 @@ import {
 	ValueBoolean
 } from '@shockpkg/plist-dom';
 
-import {shutdownHook, shutdownUnhook} from './util';
-
 export interface IMounterOptions {
 	//
 	/**
@@ -85,6 +83,11 @@ export interface IMounterAttachInfo {
 	 * Eject disk.
 	 */
 	eject(options?: Readonly<IMounterEjectOptions> | null): Promise<void>;
+
+	/**
+	 * Eject disk.
+	 */
+	ejectSync(options?: Readonly<IMounterEjectOptions> | null): void;
 }
 
 /**
@@ -107,26 +110,43 @@ export class Mounter {
 
 	/**
 	 * Attach a disk image.
-	 * Optionally can attempt to eject on shutdown if not ejected by callback.
-	 * Passing a non-null object for ejectOnShutdown will enable auto-eject.
-	 * Passing null will not enable the auto-eject on shutdown (default).
 	 *
 	 * @param file Path to disk image.
 	 * @param options Options object.
-	 * @param ejectOnShutdown Eject on shutdown options, or null.
 	 * @returns Info object.
 	 */
 	public async attach(
 		file: string,
-		options: Readonly<IMounterAttachOptions> | null = null,
-		ejectOnShutdown: Readonly<IMounterEjectOptions> | null = null
-	) {
+		options: Readonly<IMounterAttachOptions> | null = null
+	): Promise<IMounterAttachInfo> {
 		const devices = await this._runAttach(this._argsAttach(file, options));
-		const eject = this._createEject(devices, ejectOnShutdown);
+		const {eject, ejectSync} = this._createEjects(devices);
 		return {
 			devices,
-			eject
-		} as IMounterAttachInfo;
+			eject,
+			ejectSync
+		};
+	}
+
+	/**
+	 * Attach a disk image.
+	 *
+	 * @param file Path to disk image.
+	 * @param options Options object.
+	 * @returns Info object.
+	 */
+	public attachSync(
+		file: string,
+		options: Readonly<IMounterAttachOptions> | null = null
+	): IMounterAttachInfo {
+		// eslint-disable-next-line no-sync
+		const devices = this._runAttachSync(this._argsAttach(file, options));
+		const {eject, ejectSync} = this._createEjects(devices);
+		return {
+			devices,
+			eject,
+			ejectSync
+		};
 	}
 
 	/**
@@ -219,6 +239,23 @@ export class Mounter {
 			throw new Error(`Attach failed: hdiutil exit code: ${code}`);
 		}
 		return this._parseDevices(Buffer.concat(stdouts).toString());
+	}
+
+	/**
+	 * Run hdiutil attach command, returning the devices list on success.
+	 *
+	 * @param args CLI args.
+	 * @returns Devices list.
+	 */
+	protected _runAttachSync(args: Readonly<string[]>) {
+		const {status, error, stdout} = spawnSync(this.hdiutil, args);
+		if (error) {
+			throw error;
+		}
+		if (status) {
+			throw new Error(`Attach failed: hdiutil exit code: ${status}`);
+		}
+		return this._parseDevices(stdout.toString());
 	}
 
 	/**
@@ -330,52 +367,39 @@ export class Mounter {
 	}
 
 	/**
-	 * Create an eject callback from list of devices.
+	 * Create ejects callback from a list of devices.
 	 *
 	 * @param devices Device list.
-	 * @param ejectOnShutdown Eject on shutdown options.
 	 * @returns Callback function.
 	 */
-	protected _createEject(
-		devices: Readonly<Readonly<IMounterDevice>[]>,
-		ejectOnShutdown: Readonly<IMounterEjectOptions> | null = null
-	) {
+	protected _createEjects(devices: Readonly<Readonly<IMounterDevice>[]>) {
 		// Find the root device, to use to eject (none possible in theory).
-		const rootDev = this._findRootDevice(devices);
-		const rootDevPath = rootDev ? rootDev.devEntry : null;
-
-		let shutdownEjector: (() => Promise<unknown>) | null = null;
-
-		/**
-		 * The eject callback function.
-		 *
-		 * @param options  Eject options.
-		 */
-		const eject = async (options: IMounterEjectOptions | null = null) => {
-			// If shutdown ejector registered, remove now.
-			if (shutdownEjector) {
-				shutdownUnhook(shutdownEjector);
-				shutdownEjector = null;
-			}
-
-			// Only eject if something to eject.
-			if (!rootDevPath) {
-				return;
-			}
-			await this.eject(rootDevPath, options);
-		};
-
-		// Possibly register shutdown hook, using the eject options.
-		if (rootDevPath && ejectOnShutdown) {
+		let devEntry = this._findRootDevice(devices)?.devEntry;
+		return {
 			/**
-			 * Shutdown ejector.
+			 * The eject callback function.
+			 *
+			 * @param options Eject options.
 			 */
-			shutdownEjector = async () => {
-				await eject(ejectOnShutdown);
-			};
-			shutdownHook(shutdownEjector);
-		}
+			eject: async (options: IMounterEjectOptions | null = null) => {
+				if (devEntry) {
+					await this.eject(devEntry, options);
+					devEntry = '';
+				}
+			},
 
-		return eject;
+			/**
+			 * The eject callback function.
+			 *
+			 * @param options Eject options.
+			 */
+			ejectSync: (options: IMounterEjectOptions | null = null) => {
+				if (devEntry) {
+					// eslint-disable-next-line no-sync
+					this.ejectSync(devEntry, options);
+					devEntry = '';
+				}
+			}
+		};
 	}
 }

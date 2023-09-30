@@ -50,6 +50,11 @@ class MounterTestRun extends Mounter {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async _runAttach(args: Readonly<string[]>) {
+		// eslint-disable-next-line no-sync
+		return this._runAttachSync(args);
+	}
+
+	protected _runAttachSync(args: Readonly<string[]>) {
 		this.attachArgs = args;
 		return [
 			{
@@ -71,6 +76,11 @@ class MounterTestRun extends Mounter {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	protected async _runEject(args: Readonly<string[]>) {
+		// eslint-disable-next-line no-sync
+		this._runEjectSync(args);
+	}
+
+	protected _runEjectSync(args: readonly string[]): void {
 		this.ejectArgs = args;
 	}
 }
@@ -187,37 +197,44 @@ void describe('mounter', () => {
 		void describe('attach (real)', () => {
 			for (const fixtureTestDiskImage of fixtureTestDiskImages) {
 				void describe(fixtureTestDiskImage, () => {
-					void it('hdi attach and eject', async () => {
-						const mounter = new Mounter();
-						const info = await mounter.attach(
-							fixtureTestDiskImage,
-							null,
-							{}
-						);
+					for (const sync of [false, true]) {
+						const desc = sync ? 'sync' : 'async';
+						void it(`hdi attach and eject (${desc})`, async () => {
+							const mounter = new Mounter();
+							const info = sync
+								? // eslint-disable-next-line no-sync
+								  mounter.attachSync(fixtureTestDiskImage)
+								: await mounter.attach(fixtureTestDiskImage);
 
-						let mountPoint: string | null = null;
-						for (const device of info.devices) {
-							if (device.mountPoint) {
-								mountPoint = device.mountPoint || null;
+							let mountPoint: string | null = null;
+							for (const device of info.devices) {
+								if (device.mountPoint) {
+									mountPoint = device.mountPoint || null;
+								}
 							}
-						}
-						strictEqual(typeof mountPoint, 'string');
-						if (mountPoint) {
-							const listing = await dirlist(mountPoint);
-							deepStrictEqual(listing, [
-								'file-a.txt',
-								'file-b.txt',
-								'file-c.txt'
-							]);
-						}
+							strictEqual(typeof mountPoint, 'string');
+							if (mountPoint) {
+								const listing = await dirlist(mountPoint);
+								deepStrictEqual(listing, [
+									'file-a.txt',
+									'file-b.txt',
+									'file-c.txt'
+								]);
+							}
 
-						await info.eject();
+							if (sync) {
+								// eslint-disable-next-line no-sync
+								info.ejectSync();
+							} else {
+								await info.eject();
+							}
 
-						if (mountPoint) {
-							const st = await stat(mountPoint);
-							strictEqual(st, null);
-						}
-					});
+							if (mountPoint) {
+								const st = await stat(mountPoint);
+								strictEqual(st, null);
+							}
+						});
+					}
 				});
 			}
 		});
