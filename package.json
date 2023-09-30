@@ -4,12 +4,14 @@
 	"version": "2.0.3",
 	"keywords": [
 		"shockpkg",
-		"package",
-		"manager",
 		"disk",
 		"image",
 		"hdiutil",
-		"mac"
+		"mac",
+		"macos",
+		"dmg",
+		"iso",
+		"cdr"
 	],
 	"main": "cjs/index",
 	"exports": {
