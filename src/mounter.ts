@@ -9,7 +9,6 @@ import {
 } from '@shockpkg/plist-dom';
 
 export interface IMounterOptions {
-	//
 	/**
 	 * The path for hdiutil.
 	 *
@@ -19,7 +18,6 @@ export interface IMounterOptions {
 }
 
 export interface IMounterAttachOptions {
-	//
 	/**
 	 * Force the devices to be read-only.
 	 */
@@ -32,7 +30,6 @@ export interface IMounterAttachOptions {
 }
 
 export interface IMounterEjectOptions {
-	//
 	/**
 	 * Forcibly detach.
 	 */
@@ -40,7 +37,6 @@ export interface IMounterEjectOptions {
 }
 
 export interface IMounterDevice {
-	//
 	/**
 	 * The dev-entry hdiutil info.
 	 */
@@ -73,7 +69,6 @@ export interface IMounterDevice {
 }
 
 export interface IMounterAttachInfo {
-	//
 	/**
 	 * Device list.
 	 */
