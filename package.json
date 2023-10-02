@@ -53,17 +53,17 @@
 	"copyright": "Copyright (c) 2019-2023 JrMasterModelBuilder",
 	"license": "MPL-2.0",
 	"dependencies": {
-		"@shockpkg/plist-dom": "^4.0.1"
+		"@shockpkg/plist-dom": "^4.0.3"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.23.0",
 		"@babel/core": "^7.23.0",
 		"@babel/preset-env": "^7.22.20",
 		"@babel/preset-typescript": "^7.23.0",
-		"@types/node": "^20.7.2",
+		"@types/node": "^20.8.0",
 		"@typescript-eslint/eslint-plugin": "^6.7.3",
 		"@typescript-eslint/parser": "^6.7.3",
-		"babel-plugin-esm-resolver": "^2.3.1",
+		"babel-plugin-esm-resolver": "^2.3.2",
 		"babel-plugin-search-and-replace": "^1.1.1",
 		"eslint": "^8.50.0",
 		"eslint-config-prettier": "^9.0.0",

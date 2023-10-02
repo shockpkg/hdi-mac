@@ -12,7 +12,6 @@ jobs:
 
           - runs-on: macos-latest
             node-version: '18.18.0' # LTS (current)
-            CODE_CHECK: 1
 
           - runs-on: ubuntu-latest
             node-version: '18.18.0' # LTS (current)
