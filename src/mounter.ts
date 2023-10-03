@@ -108,11 +108,13 @@ export class Mounter {
 	 *
 	 * @param file Path to disk image.
 	 * @param options Options object.
+	 * @param ejectOnExit Eject on exit options, or null.
 	 * @returns Info object.
 	 */
 	public async attach(
 		file: string,
-		options: Readonly<IMounterAttachOptions> | null = null
+		options: Readonly<IMounterAttachOptions> | null = null,
+		ejectOnExit: Readonly<IMounterEjectOptions> | null = null
 	): Promise<IMounterAttachInfo> {
 		const devices = await this._runAttach(this._argsAttach(file, options));
 		const {eject, ejectSync} = this._createEjects(devices);
@@ -128,11 +130,13 @@ export class Mounter {
 	 *
 	 * @param file Path to disk image.
 	 * @param options Options object.
+	 * @param ejectOnExit Eject on exit options, or null.
 	 * @returns Info object.
 	 */
 	public attachSync(
 		file: string,
-		options: Readonly<IMounterAttachOptions> | null = null
+		options: Readonly<IMounterAttachOptions> | null = null,
+		ejectOnExit: Readonly<IMounterEjectOptions> | null = null
 	): IMounterAttachInfo {
 		// eslint-disable-next-line no-sync
 		const devices = this._runAttachSync(this._argsAttach(file, options));
@@ -365,12 +369,18 @@ export class Mounter {
 	 * Create ejects callback from a list of devices.
 	 *
 	 * @param devices Device list.
+	 * @param ejectOnExit Eject on exit options, or null.
 	 * @returns Callback function.
 	 */
-	protected _createEjects(devices: Readonly<Readonly<IMounterDevice>[]>) {
+	protected _createEjects(
+		devices: Readonly<Readonly<IMounterDevice>[]>,
+		ejectOnExit = null
+	) {
 		// Find the root device, to use to eject (none possible in theory).
 		let devEntry = this._findRootDevice(devices)?.devEntry;
-		return {
+
+		let shutdown: (() => void) | null = null;
+		const info = {
 			/**
 			 * The eject callback function.
 			 *
@@ -380,6 +390,9 @@ export class Mounter {
 				if (devEntry) {
 					await this.eject(devEntry, options);
 					devEntry = '';
+					if (shutdown) {
+						process.off('exit', shutdown);
+					}
 				}
 			},
 
@@ -393,8 +406,26 @@ export class Mounter {
 					// eslint-disable-next-line no-sync
 					this.ejectSync(devEntry, options);
 					devEntry = '';
+					if (shutdown) {
+						process.off('exit', shutdown);
+					}
 				}
 			}
 		};
+
+		if (ejectOnExit) {
+			/**
+			 * Attempt to auto-eject on normal shutdown.
+			 * Does not catch signals (no clean way in a library).
+			 * Users can explicitly call process.exit() on signals to use this.
+			 */
+			shutdown = () => {
+				// eslint-disable-next-line no-sync
+				info.ejectSync(ejectOnExit);
+			};
+			process.once('exit', shutdown);
+		}
+
+		return info;
 	}
 }
