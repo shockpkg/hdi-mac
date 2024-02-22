@@ -57,7 +57,7 @@
 	"repository": "https://github.com/shockpkg/hdi-mac.git",
 	"bugs": "https://github.com/shockpkg/hdi-mac/issues",
 	"author": "JrMasterModelBuilder",
-	"copyright": "Copyright (c) 2019-2023 JrMasterModelBuilder",
+	"copyright": "Copyright (c) 2019-2024 JrMasterModelBuilder",
 	"license": "MPL-2.0",
 	"dependencies": {
 		"@shockpkg/plist-dom": "^4.0.4"
