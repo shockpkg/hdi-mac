@@ -190,7 +190,7 @@ void describe('mounter', () => {
 							const mounter = new Mounter();
 							const info = sync
 								? // eslint-disable-next-line no-sync
-								  mounter.attachSync(fixtureTestDiskImage)
+									mounter.attachSync(fixtureTestDiskImage)
 								: await mounter.attach(fixtureTestDiskImage);
 
 							let mountPoint: string | null = null;
