@@ -1,2 +1,2 @@
-export * from './meta';
-export * from './mounter';
+export * from './meta.ts';
+export * from './mounter.ts';

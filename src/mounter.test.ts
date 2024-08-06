@@ -4,7 +4,7 @@ import {deepStrictEqual, ok, strictEqual} from 'node:assert';
 import {lstat, readdir} from 'node:fs/promises';
 import {platform, release} from 'node:os';
 
-import {Mounter} from './mounter';
+import {Mounter} from './mounter.ts';
 
 const fixtures = './spec/fixtures';
 
