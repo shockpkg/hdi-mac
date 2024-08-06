@@ -224,7 +224,7 @@ export class Mounter {
 	 * @param args CLI args.
 	 * @returns Devices list.
 	 */
-	protected async _runAttach(args: Readonly<string[]>) {
+	protected async _runAttach(args: readonly string[]) {
 		const stdouts: Buffer[] = [];
 		const proc = spawn(this.hdiutil, args);
 		proc.stdout.on('data', (data: Buffer) => {
@@ -246,7 +246,7 @@ export class Mounter {
 	 * @param args CLI args.
 	 * @returns Devices list.
 	 */
-	protected _runAttachSync(args: Readonly<string[]>) {
+	protected _runAttachSync(args: readonly string[]) {
 		const {status, error, stdout} = spawnSync(this.hdiutil, args);
 		if (error) {
 			throw error;
@@ -262,7 +262,7 @@ export class Mounter {
 	 *
 	 * @param args CLI args.
 	 */
-	protected async _runEject(args: Readonly<string[]>) {
+	protected async _runEject(args: readonly string[]) {
 		const proc = spawn(this.hdiutil, args);
 		const status = await new Promise<number | null>((resolve, reject) => {
 			proc.once('exit', resolve);
@@ -278,7 +278,7 @@ export class Mounter {
 	 *
 	 * @param args CLI args.
 	 */
-	protected _runEjectSync(args: Readonly<string[]>) {
+	protected _runEjectSync(args: readonly string[]) {
 		const {status, error} = spawnSync(this.hdiutil, args);
 		if (error) {
 			throw error;
@@ -355,7 +355,7 @@ export class Mounter {
 	 * @param devices Device list.
 	 * @returns Root device or null if an empty list.
 	 */
-	protected _findRootDevice(devices: Readonly<Readonly<IMounterDevice>[]>) {
+	protected _findRootDevice(devices: readonly Readonly<IMounterDevice>[]) {
 		let r: IMounterDevice | null = null;
 		for (const device of devices) {
 			if (r === null || r.devEntry.length > device.devEntry.length) {
@@ -373,7 +373,7 @@ export class Mounter {
 	 * @returns Callback function.
 	 */
 	protected _createEjects(
-		devices: Readonly<Readonly<IMounterDevice>[]>,
+		devices: readonly Readonly<IMounterDevice>[],
 		ejectOnExit = null
 	) {
 		// Find the root device, to use to eject (none possible in theory).

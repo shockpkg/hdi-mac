@@ -31,17 +31,16 @@ async function dirlist(path: string) {
 }
 
 class MounterTestRun extends Mounter {
-	public attachArgs: Readonly<string[]> = [];
+	public attachArgs: readonly string[] = [];
 
-	public ejectArgs: Readonly<string[]> = [];
+	public ejectArgs: readonly string[] = [];
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	protected async _runAttach(args: Readonly<string[]>) {
+	protected async _runAttach(args: readonly string[]) {
 		// eslint-disable-next-line no-sync
 		return this._runAttachSync(args);
 	}
 
-	protected _runAttachSync(args: Readonly<string[]>) {
+	protected _runAttachSync(args: readonly string[]) {
 		this.attachArgs = args;
 		return [
 			{
@@ -61,8 +60,7 @@ class MounterTestRun extends Mounter {
 		];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	protected async _runEject(args: Readonly<string[]>) {
+	protected async _runEject(args: readonly string[]) {
 		// eslint-disable-next-line no-sync
 		this._runEjectSync(args);
 	}
